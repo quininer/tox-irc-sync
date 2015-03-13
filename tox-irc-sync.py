@@ -18,6 +18,7 @@ PWD = ''
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
 NAME = NICK = IDENT = REALNAME = 'SyncBot'
+TOX_NAME = 'SyncBot'
 
 CHANNEL = '#tox-ontopic'
 MEMORY_DB = 'memory.pickle'
@@ -63,8 +64,6 @@ class AV(ToxAV):
         sys.stdout.flush()
         self.send_video(idx, width, height, data)
 
-bot_toxname = 'SyncBot'
-
 class SyncBot(Tox):
     def __init__(self):
         if exists('data'):
@@ -72,7 +71,7 @@ class SyncBot(Tox):
 
         self.av = AV(self, 10)
         self.connect()
-        self.set_name(bot_toxname)
+        self.set_name(TOX_NAME)
         self.set_status_message("Send me a message with the word 'invite'")
         print('ID: %s' % self.get_address())
 
@@ -202,8 +201,9 @@ class SyncBot(Tox):
             if message.startswith('>'):
                 message = '\x0309%s\x03' % message
 
-            self.irc_send('PRIVMSG %s :[%s]: %s\r\n' %
-                          (CHANNEL, name, message))
+            for m in message.split('\n'):
+                self.irc_send('PRIVMSG %s :[%s]: %s\r\n' % (CHANNEL, name, message))
+
             if message.startswith('^'):
                 self.handle_command(message)
 
