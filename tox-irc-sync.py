@@ -143,11 +143,11 @@ class SyncBot(Tox):
                                 CHANNEL, line, re.S)
                         if rx:
                             print('IRC> %s: %s' % rx.groups())
-                            msg = '[%s]: %s' % rx.groups()
+                            msg = '[%s] %s' % rx.groups()
                             content = rx.group(2)
 
                             if content[1:].startswith('ACTION '):
-                                action = '[%s]: %s' % (rx.group(1),
+                                action = '[%s] %s' % (rx.group(1),
                                         rx.group(2)[8:-1])
                                 self.ensure_exe(self.group_action_send,
                                         (self.tox_group_id, action))
@@ -202,7 +202,7 @@ class SyncBot(Tox):
                 message = '\x0309%s\x03' % message
 
             for m in message.split('\n'):
-                self.irc_send('PRIVMSG %s :[%s]: %s\r\n' % (CHANNEL, name, m))
+                self.irc_send('PRIVMSG %s :[%s] %s\r\n' % (CHANNEL, name, m))
 
             if message.startswith('^'):
                 self.handle_command(message)
@@ -213,7 +213,7 @@ class SyncBot(Tox):
             print('TOX> %s: %s' % (name, action))
             if action.startswith('>'):
                 action = '\x0309%s\x03' % action
-            self.irc_send('PRIVMSG %s :\x01ACTION [%s]: %s\x01\r\n' %
+            self.irc_send('PRIVMSG %s :\x01ACTION [%s] %s\x01\r\n' %
                     (CHANNEL, name, action))
 
     def on_friend_request(self, pk, message):
