@@ -202,7 +202,7 @@ class SyncBot(Tox):
                 message = '\x0309%s\x03' % message
 
             for m in message.split('\n'):
-                self.irc_send('PRIVMSG %s :[%s]: %s\r\n' % (CHANNEL, name, message))
+                self.irc_send('PRIVMSG %s :[%s]: %s\r\n' % (CHANNEL, name, m))
 
             if message.startswith('^'):
                 self.handle_command(message)
