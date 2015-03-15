@@ -17,8 +17,7 @@ PWD = ''
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6667
-NAME = NICK = IDENT = REALNAME = 'SyncBot'
-TOX_NAME = 'SyncBot'
+TOX_NAME = NAME = NICK = IDENT = REALNAME = 'SyncBot'
 
 CHANNEL = '#tox-ontopic'
 MEMORY_DB = 'memory.pickle'
@@ -201,8 +200,9 @@ class SyncBot(Tox):
             if message.startswith('>'):
                 message = '\x0309%s\x03' % message
 
-            for m in message.split('\n'):
-                self.irc_send('PRIVMSG %s :[%s] %s\r\n' % (CHANNEL, name, m))
+            for msg in message.split('\n'):
+                if not msg: continue
+                self.irc_send('PRIVMSG %s :[%s] %s\r\n' % (CHANNEL, name, msg))
 
             if message.startswith('^'):
                 self.handle_command(message)
