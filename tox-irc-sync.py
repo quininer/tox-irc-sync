@@ -4,6 +4,7 @@ import string
 import select
 import re
 import pickle
+import ssl
 
 from pytox import Tox, ToxAV
 
@@ -12,14 +13,14 @@ from os.path import exists
 from threading import Thread
 
 SERVER = ['54.199.139.199', 33445, '7F9C31FE850E97CEFD4C4591DF93FC757C7C12549DDD55F8EEAECC34FE76C029']
-GROUP_BOT = '56A1ADE4B65B86BCD51CC73E2CD4E542179F47959FE3E0E21B4B0ACDADE51855D34D34D37CB5'
+GROUP_BOT = '4E8C7460CF178EAC4CE0016BA1A6EBA3FB736FB52C6791CDDB1E5EE2157F355105DA73848639'
 PWD = ''
 
 IRC_HOST = 'irc.freenode.net'
-IRC_PORT = 6667
-TOX_NAME = NAME = NICK = IDENT = REALNAME = 'SyncBot'
+IRC_PORT = 6697
+TOX_NAME = NAME = NICK = IDENT = REALNAME = 'toxsync'
 
-CHANNEL = '#tox-ontopic'
+CHANNEL = '#linuxba'
 MEMORY_DB = 'memory.pickle'
 
 class AV(ToxAV):
@@ -87,6 +88,7 @@ class SyncBot(Tox):
     def irc_init(self):
         self.irc = socket.socket()
         self.irc.connect((IRC_HOST, IRC_PORT))
+        self.irc = ssl.wrap_socket(self.irc)
         self.irc.send('NICK %s\r\n' % NICK)
         self.irc.send('USER %s %s bla :%s\r\n' % (IDENT, IRC_HOST, REALNAME))
 
@@ -241,7 +243,7 @@ class SyncBot(Tox):
         if cmd in ['syncbot', 'echobot']:
             self.send_both(self.get_address())
         elif cmd == 'resync':
-            sys.exit(0)
+            #sys.exit(0)
         elif cmd.startswith('remember '):
             args = cmd[9:].split(' ')
             subject = args[0]
