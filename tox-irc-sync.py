@@ -243,6 +243,7 @@ class SyncBot(Tox):
         if cmd in ['syncbot', 'echobot']:
             self.send_both(self.get_address())
         elif cmd == 'resync':
+            pass
             #sys.exit(0)
         elif cmd.startswith('remember '):
             args = cmd[9:].split(' ')
