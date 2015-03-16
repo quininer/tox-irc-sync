@@ -13,14 +13,14 @@ from os.path import exists
 from threading import Thread
 
 SERVER = ['54.199.139.199', 33445, '7F9C31FE850E97CEFD4C4591DF93FC757C7C12549DDD55F8EEAECC34FE76C029']
-GROUP_BOT = '4E8C7460CF178EAC4CE0016BA1A6EBA3FB736FB52C6791CDDB1E5EE2157F355105DA73848639'
+GROUP_BOT = 'DC7553B5414FCFA537AD544FE5B569149C2E52013030FE325CE9DE827B2B5541F388FC1C4DD1'
 PWD = ''
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6697
 TOX_NAME = NAME = NICK = IDENT = REALNAME = 'toxsync'
 
-CHANNEL = '#linuxba'
+CHANNEL = '#linuxbatest'
 MEMORY_DB = 'memory.pickle'
 
 class AV(ToxAV):
@@ -89,8 +89,8 @@ class SyncBot(Tox):
         self.irc = socket.socket()
         self.irc.connect((IRC_HOST, IRC_PORT))
         self.irc = ssl.wrap_socket(self.irc)
-        self.irc.send('NICK %s\r\n' % NICK)
-        self.irc.send('USER %s %s bla :%s\r\n' % (IDENT, IRC_HOST, REALNAME))
+        self.irc.send(('NICK %s\r\n' % NICK).encode())
+        self.irc.send(('USER %s %s bla :%s\r\n' % (IDENT, IRC_HOST, REALNAME)).encode())
 
     def connect(self):
         print('connecting...')
@@ -135,7 +135,7 @@ class SyncBot(Tox):
                 readable, _, _ = select.select([self.irc], [], [], 0.01)
 
                 if readable:
-                    self.readbuffer += self.irc.recv(4096)
+                    self.readbuffer += self.irc.recv(4096).decode()
                     lines = self.readbuffer.split('\n')
                     self.readbuffer = lines.pop()
 
@@ -163,9 +163,9 @@ class SyncBot(Tox):
                         if l[0] == 'PING':
                            self.irc_send('PONG %s\r\n' % l[1])
                         if l[1] == '376':
-                           self.irc.send('PRIVMSG NickServ :IDENTIFY %s %s\r\n'
-                                   % (NICK, PWD))
-                           self.irc.send('JOIN %s\r\n' % CHANNEL)
+                           self.irc.send(('PRIVMSG NickServ :IDENTIFY %s %s\r\n'
+                                   % (NICK, PWD)).encode())
+                           self.irc.send(('JOIN %s\r\n' % CHANNEL).encode())
 
                 self.do()
         except KeyboardInterrupt:
@@ -175,7 +175,7 @@ class SyncBot(Tox):
         success = False
         while not success:
             try:
-                self.irc.send(msg)
+                self.irc.send(msg.encode())
                 success = True
                 break
             except socket.error:
