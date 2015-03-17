@@ -153,7 +153,7 @@ class SyncBot(Tox):
 
                             if content[1:].startswith('ACTION '):
                                 action = '[%s] %s' % (rx.group(1),
-                                        rx.group(2)[8:-1])
+                                        re.sub(r'\x03(?:\d{1,2}(?:,\d{1,2})?)?','',rx.group(2)[8:-1]))
                                 self.ensure_exe(self.group_action_send,
                                         (self.tox_group_id, action))
                             elif self.tox_group_id != None:
