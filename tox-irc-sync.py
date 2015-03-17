@@ -135,7 +135,7 @@ class SyncBot(Tox):
                 readable, _, _ = select.select([self.irc], [], [], 0.01)
 
                 if readable:
-                    self.readbuffer += self.irc.recv(4096).decode()
+                    self.readbuffer += self.irc.recv(4096).decode() if sys.version_info >= (3, 0, 0) else self.irc.recv(4096)
                     lines = self.readbuffer.split('\n')
                     self.readbuffer = lines.pop()
 
