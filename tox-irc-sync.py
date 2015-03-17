@@ -89,8 +89,12 @@ class SyncBot(Tox):
         self.irc = socket.socket()
         self.irc.connect((IRC_HOST, IRC_PORT))
         self.irc = ssl.wrap_socket(self.irc)
-        self.irc.send(('NICK %s\r\n' % NICK).encode())
-        self.irc.send(('USER %s %s bla :%s\r\n' % (IDENT, IRC_HOST, REALNAME)).encode())
+        if sys.version_info >= (3,0,0):
+            self.irc.send(('NICK %s\r\n' % NICK).encode())
+            self.irc.send(('USER %s %s bla :%s\r\n' % (IDENT, IRC_HOST, REALNAME)).encode())
+        else:
+            self.irc.send(('NICK %s\r\n' % NICK))
+            self.irc.send(('USER %s %s bla :%s\r\n' % (IDENT, IRC_HOST, REALNAME)))
 
     def connect(self):
         print('connecting...')
@@ -163,9 +167,14 @@ class SyncBot(Tox):
                         if l[0] == 'PING':
                            self.irc_send('PONG %s\r\n' % l[1])
                         if l[1] == '376':
-                           self.irc.send(('PRIVMSG NickServ :IDENTIFY %s %s\r\n'
-                                   % (NICK, PWD)).encode())
-                           self.irc.send(('JOIN %s\r\n' % CHANNEL).encode())
+                            if sys.version_info >= (3,0,0):
+                                self.irc.send(('PRIVMSG NickServ :IDENTIFY %s %s\r\n'
+                                    % (NICK, PWD)).encode())
+                                self.irc.send(('JOIN %s\r\n' % CHANNEL).encode())
+                            else:
+                                self.irc.send(('PRIVMSG NickServ :IDENTIFY %s %s\r\n'
+                                    % (NICK, PWD)))
+                                self.irc.send(('JOIN %s\r\n' % CHANNEL))
 
                 self.do()
         except KeyboardInterrupt:
@@ -175,7 +184,10 @@ class SyncBot(Tox):
         success = False
         while not success:
             try:
-                self.irc.send(msg.encode())
+                if sys.version_info >= (3,0,0):
+                    self.irc.send(msg.encode())
+                else:
+                    self.irc.send(msg)
                 success = True
                 break
             except socket.error:
