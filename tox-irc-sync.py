@@ -255,7 +255,9 @@ class SyncBot(Tox):
         if cmd in ['syncbot', 'echobot']:
             self.send_both(self.get_address())
         elif cmd.startswith('say ') and len(cmd.split())>=1:
-            self.irc_send('PRIVMSG %s :%s\r\n' % (CHANNEL, cmd.split(' ', 1)[1]))
+            msg = cmd.split(' ', 1)[1]
+            self.ensure_exe(self.group_message_send, (self.tox_group_id, msg))
+            self.irc_send('PRIVMSG %s :%s\r\n' % (CHANNEL, msg))
         elif cmd == 'resync':
             pass
             #sys.exit(0)
