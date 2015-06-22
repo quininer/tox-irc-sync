@@ -13,14 +13,14 @@ from os.path import exists
 from threading import Thread
 
 SERVER = ['54.199.139.199', 33445, '7F9C31FE850E97CEFD4C4591DF93FC757C7C12549DDD55F8EEAECC34FE76C029']
-GROUP_BOT = '4E8C7460CF178EAC4CE0016BA1A6EBA3FB736FB52C6791CDDB1E5EE2157F355105DA73848639'
+GROUP_BOT = '34922396155AA49CE6845A2FE34A73208F6FCD6190D981B1DBBC816326F26C6CDF3581F697E7'
 PWD = ''
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6697
 TOX_NAME = NAME = NICK = IDENT = REALNAME = 'toxsync'
 
-CHANNEL = '#linuxba'
+CHANNEL = '#linux-cn-test'
 MEMORY_DB = 'memory.pickle'
 
 class AV(ToxAV):
@@ -71,9 +71,9 @@ class SyncBot(Tox):
 
         self.av = AV(self, 10)
         self.connect()
-        self.set_name(TOX_NAME)
-        self.set_status_message("Send me a message with the word 'invite'")
-        print('ID: %s' % self.get_address())
+        self.self_set_name(TOX_NAME)
+        self.self_set_status_message("Send me a message with the word 'invite'")
+        print('ID: %s' % self.self_get_address())
 
         self.readbuffer = ''
         self.tox_group_id = None
@@ -98,7 +98,7 @@ class SyncBot(Tox):
 
     def connect(self):
         print('connecting...')
-        self.bootstrap_from_address(SERVER[0], SERVER[1], SERVER[2])
+        self.bootstrap(SERVER[0], SERVER[1], SERVER[2])
 
     def ensure_exe(self, func, args):
         count = 0
@@ -111,7 +111,7 @@ class SyncBot(Tox):
                 assert count < THRESHOLD
                 count += 1
                 for i in range(10):
-                    self.do()
+                    self.iterate()
                     sleep(0.02)
 
     def loop(self):
@@ -121,15 +121,15 @@ class SyncBot(Tox):
 
         try:
             while True:
-                status = self.isconnected()
+                status = self.self_get_connection_status()
                 if not checked and status:
                     print('Connected to DHT.')
                     checked = True
                     try:
-                        self.bid = self.get_friend_id(GROUP_BOT)
+                        self.bid = self.friend_by_public_key(GROUP_BOT)
                     except:
-                        self.ensure_exe(self.add_friend, (GROUP_BOT, 'Hi'))
-                        self.bid = self.get_friend_id(GROUP_BOT)
+                        self.ensure_exe(self.friend_add, (GROUP_BOT, 'Hi'))
+                        self.bid = self.friend_by_public_key(GROUP_BOT)
 
                 if checked and not status:
                     print('Disconnected from DHT.')
@@ -176,7 +176,7 @@ class SyncBot(Tox):
                                     % (NICK, PWD)))
                                 self.irc.send(('JOIN %s\r\n' % CHANNEL))
 
-                self.do()
+                self.iterate()
         except KeyboardInterrupt:
             self.save_to_file('data')
 
@@ -199,7 +199,7 @@ class SyncBot(Tox):
                 and friendId == self.bid and status:
             print('Groupbot online, trying to join group chat.')
             self.request = True
-            self.ensure_exe(self.send_message, (self.bid, 'invite'))
+            self.ensure_exe(self.friend_send_message, (self.bid, 'invite'))
 
     def on_group_invite(self, friendid, type, data):
         if not self.joined:
@@ -232,7 +232,7 @@ class SyncBot(Tox):
 
     def on_friend_request(self, pk, message):
         print('Friend request from %s: %s' % (pk, message))
-        self.add_friend_norequest(pk)
+        self.friend_add_norequest(pk)
         print('Accepted.')
 
     def on_friend_message(self, friendid, message):
@@ -244,7 +244,7 @@ class SyncBot(Tox):
             else:
                 message = 'Waiting for GroupBot, please try again in 1 min.'
 
-        self.ensure_exe(self.send_message, (friendid, message))
+        self.ensure_exe(self.friend_send_message, (friendid, message))
 
     def send_both(self, content):
         self.ensure_exe(self.group_message_send, (self.tox_group_id, content))
