@@ -82,7 +82,7 @@ class SyncBot(Tox):
         self.memory = {}
 
         if exists(MEMORY_DB):
-            with open(MEMORY_DB, 'r') as f:
+            with open(MEMORY_DB, 'rb') as f:
                 self.memory = pickle.load(f)
 
     def irc_init(self):
@@ -178,7 +178,9 @@ class SyncBot(Tox):
 
                 self.iterate()
         except KeyboardInterrupt:
-            self.save_to_file('data')
+            # TODO wait
+            # self.save_to_file('data')
+            pass
 
     def irc_send(self, msg):
         success = False
@@ -207,7 +209,12 @@ class SyncBot(Tox):
             self.tox_group_id = self.join_groupchat(friendid, data)
             print('Joined groupchat.')
 
+    def on_friend_connection_status(self, **kwargs):
+        pass
+
     def on_group_message(self, groupnumber, friendgroupnumber, message):
+        if message.startswith("^shadow "):
+            return
         name = self.group_peername(groupnumber, friendgroupnumber)
         if len(name) and name != NAME:
             print('TOX> %s: %s' % (name, message))
@@ -255,21 +262,20 @@ class SyncBot(Tox):
         if cmd in ['syncbot', 'echobot']:
             self.send_both(self.get_address())
         elif cmd.startswith('say ') and len(cmd.split())>=1:
-            msg = cmd.split(' ', 1)[1]
-            self.ensure_exe(self.group_message_send, (self.tox_group_id, msg))
-            self.irc_send('PRIVMSG %s :%s\r\n' % (CHANNEL, msg))
+            args = cmd[len('say '):]
+            self.send_both(args)
         elif cmd == 'resync':
             pass
             #sys.exit(0)
         elif cmd.startswith('remember '):
-            args = cmd[9:].split(' ')
+            args = cmd[len('remember '):].split(' ')
             subject = args[0]
             desc = ' '.join(args[1:])
             self.memory[subject] = desc
-            with open(MEMORY_DB, 'w') as f:
+            with open(MEMORY_DB, 'wb') as f:
                 pickle.dump(self.memory, f)
             self.send_both('Remembering ^%s: %s' % (subject, desc))
-        elif self.memory.has_key(cmd):
+        elif self.memory.get(cmd):
             self.send_both(self.memory[cmd])
 
 
