@@ -12,7 +12,9 @@ from time import sleep
 from os.path import exists
 from threading import Thread
 
-SERVER = ['54.199.139.199', 33445, '7F9C31FE850E97CEFD4C4591DF93FC757C7C12549DDD55F8EEAECC34FE76C029']
+SERVER = ['127.0.0.1', 33445, 'EDF5A5BE8DFFC1DDFAACC71A0C0FCEEDE7BED4F3FBF9C54D502BE66A297DC374']
+# SERVER = ['127.0.0.1', 33445, '34922396155AA49CE6845A2FE34A73208F6FCD6190D981B1DBBC816326F26C6C']
+# SERVER = ['54.199.139.199', 33445, '7F9C31FE850E97CEFD4C4591DF93FC757C7C12549DDD55F8EEAECC34FE76C029']
 GROUP_BOT = '34922396155AA49CE6845A2FE34A73208F6FCD6190D981B1DBBC816326F26C6CDF3581F697E7'
 PWD = ''
 
@@ -196,7 +198,7 @@ class SyncBot(Tox):
                 self.irc_init()
                 sleep(1)
 
-    def on_connection_status(self, friendId, status):
+    def on_friend_connection_status(self, friendId, status):
         if not self.request and not self.joined \
                 and friendId == self.bid and status:
             print('Groupbot online, trying to join group chat.')
@@ -208,9 +210,6 @@ class SyncBot(Tox):
             self.joined = True
             self.tox_group_id = self.join_groupchat(friendid, data)
             print('Joined groupchat.')
-
-    def on_friend_connection_status(self, **kwargs):
-        pass
 
     def on_group_message(self, groupnumber, friendgroupnumber, message):
         if message.startswith("^shadow "):
