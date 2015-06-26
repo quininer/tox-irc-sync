@@ -212,7 +212,7 @@ class SyncBot(Tox):
             print('Joined groupchat.')
 
     def on_group_message(self, groupnumber, friendgroupnumber, message):
-        if message.startswith("^shadow "):
+        if message.startswith("@@"):
             return
         name = self.group_peername(groupnumber, friendgroupnumber)
         if len(name) and name != NAME:
@@ -265,17 +265,17 @@ class SyncBot(Tox):
             self.send_both(args)
         elif cmd == 'resync':
             pass
-            #sys.exit(0)
-        elif cmd.startswith('remember '):
-            args = cmd[len('remember '):].split(' ')
-            subject = args[0]
-            desc = ' '.join(args[1:])
-            self.memory[subject] = desc
-            with open(MEMORY_DB, 'wb') as f:
-                pickle.dump(self.memory, f)
-            self.send_both('Remembering ^%s: %s' % (subject, desc))
-        elif self.memory.get(cmd):
-            self.send_both(self.memory[cmd])
+            # sys.exit(0)
+#         elif cmd.startswith('remember '):
+            # args = cmd[len('remember '):].split(' ')
+            # subject = args[0]
+            # desc = ' '.join(args[1:])
+            # self.memory[subject] = desc
+            # with open(MEMORY_DB, 'wb') as f:
+                # pickle.dump(self.memory, f)
+            # self.send_both('Remembering ^%s: %s' % (subject, desc))
+        # elif self.memory.get(cmd):
+            # self.send_both(self.memory[cmd])
 
 
 t = SyncBot()
