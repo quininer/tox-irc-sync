@@ -6,7 +6,7 @@ import re
 import pickle
 import ssl
 
-from pytox import Tox, ToxAV
+from pytox import Tox, ToxAV, OperationFailedError
 
 from time import sleep
 from os.path import exists
@@ -179,6 +179,8 @@ class SyncBot(Tox):
                                 self.irc.send(('JOIN %s\r\n' % CHANNEL))
 
                 self.iterate()
+        except OperationFailedError:
+            pass
         except KeyboardInterrupt:
             # TODO wait
             # self.save_to_file('data')
@@ -249,8 +251,12 @@ class SyncBot(Tox):
                 return
             else:
                 message = 'Waiting for GroupBot, please try again in 1 min.'
+        elif message == "Group doesn't exist.":
+            message = 'group text'
 
         self.ensure_exe(self.friend_send_message, (friendid, message))
+        if message == "Group doesn't exist.":
+            self.ensure_exe(self.friend_send_message, (friendid, 'invite'))
 
     def send_both(self, content):
         self.ensure_exe(self.group_message_send, (self.tox_group_id, content))
@@ -259,7 +265,8 @@ class SyncBot(Tox):
     def handle_command(self, cmd):
         cmd = cmd[1:]
         if cmd in ['syncbot', 'echobot']:
-            self.send_both(self.get_address())
+#            self.send_both(self.get_address())
+            pass
         elif cmd.startswith('say ') and len(cmd.split())>=1:
             args = cmd[len('say '):]
             self.send_both(args)
