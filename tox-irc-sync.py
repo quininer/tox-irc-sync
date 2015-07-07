@@ -20,7 +20,7 @@ PWD = ''
 
 IRC_HOST = 'irc.freenode.net'
 IRC_PORT = 6697
-TOX_NAME = NAME = NICK = IDENT = REALNAME = 'toxsync'
+TOX_NAME = NAME = NICK = IDENT = REALNAME = 'toxsync-test'
 
 CHANNEL = '#linux-cn-test'
 MEMORY_DB = 'memory.pickle'
@@ -141,7 +141,7 @@ class SyncBot(Tox):
                 readable, _, _ = select.select([self.irc], [], [], 0.01)
 
                 if readable:
-                    self.readbuffer += self.irc.recv(4096).decode() if sys.version_info >= (3, 0, 0) else self.irc.recv(4096)
+                    self.readbuffer += self.irc.recv(4096).decode('utf-8') if sys.version_info >= (3, 0, 0) else self.irc.recv(4096)
                     lines = self.readbuffer.split('\n')
                     self.readbuffer = lines.pop()
 
@@ -163,7 +163,8 @@ class SyncBot(Tox):
                                         (self.tox_group_id, msg))
 
                             if content.startswith('^'):
-                                self.handle_command(content)
+                                # self.handle_command(content)
+                                pass
 
                         l = line.rstrip().split()
                         if l[0] == 'PING':
