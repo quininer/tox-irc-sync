@@ -206,7 +206,7 @@ class SyncBot(Tox):
                 and friendId == self.bid and status:
             print('Groupbot online, trying to join group chat.')
             self.request = True
-            self.ensure_exe(self.friend_send_message, (self.bid, 'invite'))
+            self.ensure_exe(self.friend_send_message, (self.bid, Tox.MESSAGE_TYPE_NORMAL, 'invite'))
 
     def on_group_invite(self, friendid, type, data):
         if not self.joined:
@@ -224,7 +224,7 @@ class SyncBot(Tox):
                 message = '\x0309%s\x03' % message
 
             for msg in message.split('\n'):
-                if not msg: continue
+                if not msg.strip(): continue
                 self.irc_send('PRIVMSG %s :(%s) %s\r\n' % (CHANNEL, name, msg))
 
             if message.startswith('^'):
@@ -255,9 +255,9 @@ class SyncBot(Tox):
         elif message == "Group doesn't exist.":
             message = 'group text'
 
-        self.ensure_exe(self.friend_send_message, (friendid, message))
+        self.ensure_exe(self.friend_send_message, (friendid, Tox.MESSAGE_TYPE_NORMAL, message))
         if message == "Group doesn't exist.":
-            self.ensure_exe(self.friend_send_message, (friendid, 'invite'))
+            self.ensure_exe(self.friend_send_message, (friendid, Tox.MESSAGE_TYPE_NORMAL, 'invite'))
 
     def send_both(self, content):
         self.ensure_exe(self.group_message_send, (self.tox_group_id, content))
