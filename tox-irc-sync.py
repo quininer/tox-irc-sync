@@ -1,6 +1,5 @@
 import sys
 import socket
-import string
 import select
 import re
 import pickle
@@ -10,7 +9,6 @@ from pytox import Tox, OperationFailedError
 
 from time import sleep
 from os.path import exists
-from threading import Thread
 
 SERVER = ['127.0.0.1', 33445, 'EDF5A5BE8DFFC1DDFAACC71A0C0FCEEDE7BED4F3FBF9C54D502BE66A297DC374']
 # SERVER = ['127.0.0.1', 33445, '34922396155AA49CE6845A2FE34A73208F6FCD6190D981B1DBBC816326F26C6C']
@@ -24,6 +22,8 @@ TOX_NAME = NAME = NICK = IDENT = REALNAME = 'toxsync-test'
 
 CHANNEL = '#linux-cn-test'
 MEMORY_DB = 'memory.pickle'
+
+BLOCK_LIST = set()
 
 
 class SyncBot(Tox):
@@ -109,6 +109,12 @@ class SyncBot(Tox):
                             print('IRC> %s: %s' % rx.groups())
                             msg = '(%s) %s' % (rx.groups()[0], re.sub(r'\x03(?:\d{1,2}(?:,\d{1,2})?)?','',rx.groups()[1]))
                             content = rx.group(2)
+
+                            if (
+                                rx.groups()[0] in BLOCK_LIST or
+                                content.split("[")[-1].split("]")[0] in BLOCK_LIST
+                            ):
+                                continue
 
                             if content[1:].startswith('ACTION '):
                                 action = '(%s) %s' % (rx.group(1),
@@ -231,6 +237,18 @@ class SyncBot(Tox):
         elif cmd == 'resync':
             pass
             # sys.exit(0)
+        elif cmd.startswith("block "):
+            if len(BLOCK_LIST) <= 10:
+                BLOCK_LIST.add(cmd.split(" ")[-1])
+            else:
+                self.send_both("block list too long.")
+        elif cmd.startswith("unblock "):
+            try:
+                BLOCK_LIST.remove(cmd.split(" ")[-1])
+            except KeyError as err:
+                self.send_both("the list have no {}.".format(err))
+        elif cmd.startswith("blist"):
+            self.send_both("BLOCK LIST: {}".format(" | ".join(map(str, BLOCK_LIST))))
 #         elif cmd.startswith('remember '):
             # args = cmd[len('remember '):].split(' ')
             # subject = args[0]
