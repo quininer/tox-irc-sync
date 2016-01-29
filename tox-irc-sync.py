@@ -112,7 +112,7 @@ class SyncBot(Tox):
 
                             if (
                                 rx.groups()[0] in BLOCK_LIST or
-                                content.split("[")[-1].split("]")[0] in BLOCK_LIST
+                                content.split("[", 1)[-1].split("]", 1)[0] in BLOCK_LIST
                             ):
                                 continue
 
