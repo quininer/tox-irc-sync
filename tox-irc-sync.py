@@ -59,7 +59,7 @@ class SyncBot(Tox):
         print('connecting...')
         self.bootstrap(SERVER[0], SERVER[1], SERVER[2])
 
-    def ensure_exe(self, func, args):
+    def ensure_exe(self, func, args, ty):
         count = 0
         THRESHOLD = 50
 
@@ -119,11 +119,11 @@ class SyncBot(Tox):
                             if content[1:].startswith('ACTION '):
                                 action = '(%s) %s' % (rx.group(1),
                                         re.sub(r'\x03(?:\d{1,2}(?:,\d{1,2})?)?','',rx.group(2)[8:-1]))
-                                self.ensure_exe(self.group_action_send,
-                                        (self.tox_group_id, action))
+                                self.ensure_exe(self.conference_send_message,
+                                        (self.tox_group_id, Tox.MESSAGE_TYPE_ACTION, action))
                             elif self.tox_group_id != None:
-                                self.ensure_exe(self.group_message_send,
-                                        (self.tox_group_id, msg))
+                                self.ensure_exe(self.conference_send_message,
+                                        (self.tox_group_id, Tox.MESSAGE_TYPE_NORMAL, msg))
 
                             if content.startswith('^'):
                                 # self.handle_command(content)
@@ -174,13 +174,13 @@ class SyncBot(Tox):
     def on_group_invite(self, friendid, type, data):
         if not self.joined:
             self.joined = True
-            self.tox_group_id = self.join_groupchat(friendid, data)
+            self.tox_group_id = self.conference_join(friendid, data)
             print('Joined groupchat.')
 
     def on_group_message(self, groupnumber, friendgroupnumber, message):
         if message.startswith("@@"):
             return
-        name = self.group_peername(groupnumber, friendgroupnumber)
+        name = self.conference_peer_get_name(groupnumber, friendgroupnumber)
         if len(name) and name != NAME:
             print('TOX> %s: %s' % (name, message))
             if message.startswith('>'):
@@ -194,7 +194,7 @@ class SyncBot(Tox):
                 self.handle_command(message)
 
     def on_group_action(self, groupnumber, friendgroupnumber, action):
-        name = self.group_peername(groupnumber, friendgroupnumber)
+        name = self.conference_peer_get_name(groupnumber, friendgroupnumber)
         if len(name) and name != NAME:
             print('TOX> %s: %s' % (name, action))
             if action.startswith('>'):
@@ -223,7 +223,7 @@ class SyncBot(Tox):
             self.ensure_exe(self.friend_send_message, (friendid, Tox.MESSAGE_TYPE_NORMAL, 'invite'))
 
     def send_both(self, content):
-        self.ensure_exe(self.group_message_send, (self.tox_group_id, content))
+        self.ensure_exe(self.conference_send_message, (self.tox_group_id, Tox.MESSAGE_TYPE_NORMAL, content))
         self.irc_send('PRIVMSG %s :%s\r\n' % (CHANNEL, content))
 
     def handle_command(self, cmd):
