@@ -171,11 +171,17 @@ class SyncBot(Tox):
             self.request = True
             self.ensure_exe(self.friend_send_message, (self.bid, Tox.MESSAGE_TYPE_NORMAL, 'invite'))
 
-    def on_group_invite(self, friendid, type, data):
+    def on_conference_invite(self, friendid, type, data):
         if not self.joined:
             self.joined = True
             self.tox_group_id = self.conference_join(friendid, data)
             print('Joined groupchat.')
+
+    def on_conference_message(self, groupnumber, friendgroupnumber, type, message):
+        if type == Tox.MESSAGE_TYPE_NORMAL:
+            self.on_group_message(groupnumber, friendgroupnumber, message)
+        elif type == Tox.MESSAGE_TYPE_ACTION:
+            self.on_group_action(groupnumber, friendgroupnumber, message)
 
     def on_group_message(self, groupnumber, friendgroupnumber, message):
         if message.startswith("@@"):
