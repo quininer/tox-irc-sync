@@ -59,7 +59,7 @@ class SyncBot(Tox):
         print('connecting...')
         self.bootstrap(SERVER[0], SERVER[1], SERVER[2])
 
-    def ensure_exe(self, func, args, ty):
+    def ensure_exe(self, func, args):
         count = 0
         THRESHOLD = 50
 
